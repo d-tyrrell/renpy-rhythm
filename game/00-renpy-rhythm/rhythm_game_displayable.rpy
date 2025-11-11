@@ -2,12 +2,14 @@
 
 define THIS_PATH = '00-renpy-rhythm/'
 
+# image video_bg = Movie(play="video/think_about_us_vid.webm", loop=True) # import background music video
+
 # XXX: using os.path.join here will actually break because Ren'Py somehow doesn't recognize it
 define IMG_DIR = 'images/'
-define IMG_UP = THIS_PATH + IMG_DIR + 'up.png'
+define IMG_UP = THIS_PATH + IMG_DIR + 'upv2.png'
 define IMG_LEFT = THIS_PATH + IMG_DIR + 'left.png'
-define IMG_RIGHT = THIS_PATH + IMG_DIR + 'right.png'
-define IMG_DOWN = THIS_PATH + IMG_DIR + 'down.png'
+define IMG_RIGHT = THIS_PATH + IMG_DIR + 'rightv2.png'
+define IMG_DOWN = THIS_PATH + IMG_DIR + 'downv2.png'
 
 # music channel for renpy.play
 define CHANNEL_RHYTHM_GAME = 'CHANNEL_RHYTHM_GAME'
@@ -100,9 +102,27 @@ screen select_song_screen(songs):
                 xalign 0.5
                 action Return(None)
 
-screen rhythm_game(rhythm_game_displayable):
+default played_once = False
+default bg_movie = None
+default video_delay = 0.0
 
-    zorder 100 # always on top, covering textbox, quick_menu
+screen rhythm_game(rhythm_game_displayable, video_file=None):
+
+    # track how long music has been running
+    if rhythm_game_displayable.has_music_started:
+        timer 0.01 repeat True action SetVariable("video_delay", video_delay + 0.01)
+
+    fixed:
+        if not rhythm_game_displayable.has_music_started:
+            add Null()
+        elif video_delay < 1.0:
+            add Null()               # wait 1s
+        else:
+            if bg_movie is None:
+                $ bg_movie = Movie(play=(video_file or "video/think_about_us_vid.webm"), loop=False)
+            add bg_movie
+
+
 
     # disable the arrow keys from activating the Quit button
     # https://www.renpy.org/doc/html/screens.html#key
@@ -111,7 +131,8 @@ screen rhythm_game(rhythm_game_displayable):
     key 'K_DOWN' action NullAction()
     key 'K_RIGHT' action NullAction()
 
-    add Solid('#000')
+
+    # add Solid('#000') disabled solid background to allow for user displayed background - David T change
     add rhythm_game_displayable
 
     vbox:
@@ -285,17 +306,26 @@ init python:
             }
 
             # define the drawables
-            self.miss_text_drawable = Text('Miss!', color='#fff', size=20) # small text
-            self.good_text_drawable = Text('Good!', color='#fff', size=30) # big text
-            self.perfect_text_drawable = Text('Perfect!', color='#fff', size=40) # bigger text
+            self.miss_text_drawable = Text('Miss!', color='#f21d1d', size=20) # small text
+            self.good_text_drawable = Text('Good!', color='#00ffaa', size=30) # big text
+            self.perfect_text_drawable = Text('Perfect!', color='#00ff3c', size=40) # bigger text
             self.track_bar_drawable = Solid('#fff', xsize=self.track_bar_width, ysize=self.track_bar_height)
             self.horizontal_bar_drawable = Solid('#fff', xsize=config.screen_width, ysize=self.horizontal_bar_height)
             # map track_idx to the note drawable
+
+            NOTE_SIZE = (75, 75)   # width, height in pixels
+            # self.note_drawables = {
+            # 0: Image(IMG_LEFT),
+            # 1: Image(IMG_UP),
+            # 2: Image(IMG_DOWN),
+            # 3: Image(IMG_RIGHT),
+            # }
+
             self.note_drawables = {
-            0: Image(IMG_LEFT),
-            1: Image(IMG_UP),
-            2: Image(IMG_DOWN),
-            3: Image(IMG_RIGHT),
+                0: Transform(Image(IMG_LEFT),  xysize=NOTE_SIZE),
+                1: Transform(Image(IMG_UP),    xysize=NOTE_SIZE),
+                2: Transform(Image(IMG_DOWN),  xysize=NOTE_SIZE),
+                3: Transform(Image(IMG_RIGHT), xysize=NOTE_SIZE),
             }
             self.note_drawables_large = {
             0: Transform(self.note_drawables[0], zoom=self.zoom_scale),

@@ -1,4 +1,7 @@
-﻿define e = Character("Eileen")
+﻿define e = Character("DJ Master")
+
+define video_bg = "video/think_about_us_vid.webm"
+
 
 # define the song titles and their files
 init python:
@@ -28,6 +31,7 @@ default persistent.rhythm_game_high_scores = {
 default selected_song = None
 
 label start:
+    jump test
     scene bg room
 
     e "Welcome to the Ren'Py Rhythm Game! Choose a lofi song you'd like to play."
@@ -41,16 +45,16 @@ label start:
 
 # a simpler way to launch the minigame 
 label test:
-    e "Welcome to the Ren'Py Rhythm Game! Ready for a challenge?"
+    e "Welcome to Dj Simulator!"
     window hide
     $ quick_menu = False
 
     # avoid rolling back and losing chess game state
     $ renpy.block_rollback()
 
-    $ song = Song('Isolation', 'audio/Isolation.mp3', 'audio/Isolation.beatmap.txt', beatmap_stride=2)
+    $ song = Song('Think about us', 'audio/think_about_us.mp3', 'audio/think_about_us.beatmap.txt', beatmap_stride=3)
     $ rhythm_game_displayable = RhythmGameDisplayable(song)
-    call screen rhythm_game(rhythm_game_displayable)
+    call screen rhythm_game(rhythm_game_displayable, video_bg)
 
     # avoid rolling back and entering the chess game again
     $ renpy.block_rollback()
