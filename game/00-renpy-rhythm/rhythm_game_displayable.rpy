@@ -11,12 +11,35 @@ define IMG_LEFT = THIS_PATH + IMG_DIR + 'left.png'
 define IMG_RIGHT = THIS_PATH + IMG_DIR + 'rightv2.png'
 define IMG_DOWN = THIS_PATH + IMG_DIR + 'downv2.png'
 
+# define IMG_DIR = 'images/'
+# define IMG_UP = THIS_PATH + IMG_DIR + 'up.png'
+# define IMG_LEFT = THIS_PATH + IMG_DIR + 'left.png'
+# define IMG_RIGHT = THIS_PATH + IMG_DIR + 'rightv2.png'
+# define IMG_DOWN = THIS_PATH + IMG_DIR + 'down.png'
+
 # music channel for renpy.play
 define CHANNEL_RHYTHM_GAME = 'CHANNEL_RHYTHM_GAME'
 
 # scores for Good and Perfect hits
 define SCORE_GOOD = 60
 define SCORE_PERFECT = 100
+
+init python:
+    import os
+
+    def song_key(s):
+        # stable, filename-based key (avoids title/case changes)
+        return os.path.splitext(os.path.basename(s.music_file))[0].lower()
+
+    VIDEO_BY_KEY = {
+        "think_about_us": "video/think_about_us_vid.webm",
+        "Wide Open":"video/wide_open.webm",
+        "isolation":     None,
+        "positivity":    None,
+        "pearlescent":   None,
+        "pearlescent_-_trimmed": None,
+        "thoughts":      None,
+    }
 
 label rhythm_game_entry_label:
     $ selected_song = renpy.call_screen(_screen_name='select_song_screen', songs=rhythm_game_songs)
@@ -38,7 +61,22 @@ label rhythm_game_entry_label:
         $ renpy.notify('Use the arrow keys on your keyboard to hit the notes as they reach the end of the tracks. Good luck!')
         # call screen rhythm_game(rhythm_game_displayable)
         # $ new_score = _return
-        $ new_score = renpy.call_screen(_screen_name='rhythm_game', rhythm_game_displayable=rhythm_game_displayable)
+
+        # find the video for this song
+        # $ key = song_key(selected_song)
+        $ video_file = VIDEO_BY_KEY.get(selected_song)
+
+        # (optional) log to verify
+        $ renpy.log(f"Selected: {selected_song.name} -> video={video_file}")
+
+        # call the game screen with the video file
+        $ new_score = renpy.call_screen(
+            _screen_name='rhythm_game',
+            rhythm_game_displayable=rhythm_game_displayable,
+            video_file=video_file
+        )
+
+        # $ new_score = renpy.call_screen(_screen_name='rhythm_game', rhythm_game_displayable=rhythm_game_displayable)
 
         # XXX: old_percent is not used, but doing `old_score, _` causes pickling error
         $ old_score, old_percent = persistent.rhythm_game_high_scores[selected_song.name]
@@ -112,11 +150,12 @@ screen rhythm_game(rhythm_game_displayable, video_file=None):
     if rhythm_game_displayable.has_music_started:
         timer 0.01 repeat True action SetVariable("video_delay", video_delay + 0.01)
 
+    # set background to video file given as argument
     fixed:
         if not rhythm_game_displayable.has_music_started:
             add Null()
         elif video_delay < 1.0:
-            add Null()               # wait 1s
+            add Null()               # wait 1s for video to match music
         else:
             if bg_movie is None:
                 $ bg_movie = Movie(play=(video_file or "video/think_about_us_vid.webm"), loop=False)
