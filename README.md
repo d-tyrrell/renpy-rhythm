@@ -8,6 +8,16 @@
 
 You can use this project as a standalone playable or integrate it as a minigame into a Ren'Py visual novel project, using any music you like and have the beat map automatically generated for you. Read the [guide for integration](https://github.com/RuolinZheng08/renpy-rhythm#guide-for-integrating-into-a-renpy-project) below.
 
+
+## Adding your own music video for the background:
+If your song has been correctly added to the rhythm songs dictionary (inside script.rpy)
+<img width="1034" height="185" alt="Screenshot 2025-12-23 at 8 53 05 PM" src="https://github.com/user-attachments/assets/1c3dd7a0-6e16-48c2-aa03-923866a42ae9" />
+You can then add your music video into the video folder (have to convert mp4 to webm for this to work I believe)
+<img width="536" height="90" alt="Screenshot 2025-12-23 at 8 53 47 PM" src="https://github.com/user-attachments/assets/a5b0b589-e023-4a49-9a88-ab5573fc0955" />
+
+
+
+
 ## Compatibility
 
 This project is compatible with both **Ren'Py 7** and **Ren'Py 8**.
